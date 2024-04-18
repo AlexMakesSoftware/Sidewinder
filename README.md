@@ -8,10 +8,15 @@ Elite was a computer game for the BBC Micro in the 80's and was a truely incread
 Many thanks to Marc Moxon who took the time to make www.bbcelite.com, where I found all the ship date I needed to recreate this model: https://www.bbcelite.com/cassette/main/variable/ship_sidewinder.html. 
 
 ## getting started with the code:
-
+```
 npm install
 
 npx vite
 
 Starts the vite development server and a build tool.
+```
 
+## To build the distribution (for hosting, say on github pages)
+```
+npx vite build
+```
