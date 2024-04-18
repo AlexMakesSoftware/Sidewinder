@@ -20,3 +20,7 @@ Starts the vite development server and a build tool.
 ```
 npx vite build
 ```
+
+## Demo
+
+To see it working live, go to: https://alexmakessoftware.github.io/Sidewinder/
