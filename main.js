@@ -1,79 +1,110 @@
+// Import necessary modules from Three.js
 import * as THREE from 'three';
+import { ConvexGeometry } from 'three/examples/jsm/geometries/ConvexGeometry';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
+// Create a scene
 const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+
+// Create a camera
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+camera.position.z = 100;
+
+// Create a renderer
 const renderer = new THREE.WebGLRenderer();
-renderer.setSize( window.innerWidth, window.innerHeight );
-document.body.appendChild( renderer.domElement );
-const geometry = new THREE.BufferGeometry();
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.body.appendChild(renderer.domElement);
 
-const vertices = new Float32Array([
-    -32, 0, 36,   // Vertex 0
-    32, 0, 36,    // Vertex 1
-    64, 0, -28,   // Vertex 2
-    -64, 0, -28,  // Vertex 3
-    0, 16, -28,   // Vertex 4
-    0, -16, -28,  // Vertex 5
-    -12, 6, -28,  // Vertex 6
-    12, 6, -28,   // Vertex 7
-    12, -6, -28,  // Vertex 8
-    -12, -6, -28  // Vertex 9
-]);
+// Define the vertices of the diamond shape
+const vertices = [
+    new THREE.Vector3(-32,   0,  36), // Vertex 0
+    new THREE.Vector3( 32,   0,  36), // Vertex 1
+    new THREE.Vector3( 64,   0, -28), // Vertex 2
+    new THREE.Vector3(-64,   0, -28), // Vertex 3
+    new THREE.Vector3(  0,  16, -28), // Vertex 4
+    new THREE.Vector3(  0, -16, -28), // Vertex 5
+    new THREE.Vector3(-12,   6, -28), // Vertex 6
+    new THREE.Vector3( 12,   6, -28), // Vertex 7
+    new THREE.Vector3( 12,  -6, -28), // Vertex 8
+    new THREE.Vector3(-12,   -6,  -28) // Vertex 9
+];
 
+// Create a geometry for the convex hull
+const convexGeometry = new ConvexGeometry(vertices);
 
-const indices = [
-    // Front face
-    0, 1, 2,
-    0, 2, 3,
-    // Side faces
-    0, 3, 4,
-    0, 4, 5,
-    0, 5, 6,
-    0, 6, 7,
-    0, 7, 8,
-    0, 8, 9,
-    // Bottom face
-    2, 3, 4,
-    2, 4, 5,
-    // Top face
-    1, 6, 7,
-    1, 7, 8,
-    1, 8, 9,
-    1, 9, 2,
-    // Back face
-    6, 7, 8,
-    6, 8, 9
+// Create a material for the solid black body
+const blackMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
+
+// Create a mesh for the solid black body
+const solidMesh = new THREE.Mesh(convexGeometry, blackMaterial);
+
+// Add the solid mesh to the scene
+scene.add(solidMesh);
+
+// Define the lines for the green outline
+const greenLines = [
+    // Outer diamond shape
+    [vertices[0], vertices[1]],
+    [vertices[1], vertices[2]],
+    [vertices[1], vertices[4]],
+    [vertices[0], vertices[4]],
+    [vertices[0], vertices[3]],
+    [vertices[3], vertices[4]],
+    [vertices[2], vertices[4]],
+    [vertices[3], vertices[5]],
+    [vertices[2], vertices[5]],
+    [vertices[1], vertices[5]],
+    [vertices[0], vertices[5]],
+    [vertices[6], vertices[7]],
+    [vertices[7], vertices[8]],
+    [vertices[6], vertices[9]],
+    [vertices[8], vertices[9]]   
 ];
 
 
-geometry.setIndex( indices );
-geometry.setAttribute( 'position', new THREE.BufferAttribute( vertices, 3 ) );
-//const material = new THREE.MeshBasicMaterial( { color: 0x00ff00, wireframe: true } );
+// Create a material for the green outline
+const greenMaterial = new THREE.LineBasicMaterial({ color: 0x00ff00 });
 
-// Create a material for the faces (black color)
-const faceMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
+// Create a group to hold all lines of the outline
+const greenOutlineGroup = new THREE.Group();
 
-// Create a material for the outline (green color)
-const outlineMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true });
+// Create lines for the green outline
+greenLines.forEach(line => {
+    const lineGeometry = new THREE.BufferGeometry().setFromPoints(line);
+    const lineMesh = new THREE.Line(lineGeometry, greenMaterial);
+    greenOutlineGroup.add(lineMesh);
+});
 
-// Create a mesh for the solid faces
-const solidMesh = new THREE.Mesh(geometry, faceMaterial);
-scene.add(solidMesh);
+// Add the green outline group to the scene
+scene.add(greenOutlineGroup);
 
-// Create a mesh for the outline
-const outlineMesh = new THREE.Mesh(geometry, outlineMaterial);
-scene.add(outlineMesh);
 
-camera.position.z = 100;
+// const controls = new OrbitControls( camera, renderer.domElement );
+// 			controls.target.set( 0, 0.5, 0 );
+// 			controls.update();
+// 			controls.enablePan = false;
+// 			controls.enableDamping = true;
 
+
+window.onresize = function () {
+
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+
+    renderer.setSize( window.innerWidth, window.innerHeight );
+
+};            
+
+
+// Render the scene
 function animate() {
-	requestAnimationFrame( animate );
+    requestAnimationFrame(animate);
 
     solidMesh.rotation.x += 0.01;
     solidMesh.rotation.y += 0.01;
-    outlineMesh.rotation.x += 0.01;
-    outlineMesh.rotation.y += 0.01;
+    greenOutlineGroup.rotation.x += 0.01;
+    greenOutlineGroup.rotation.y += 0.01;
 
-	renderer.render( scene, camera );
+    renderer.render(scene, camera);
 }
 animate();
